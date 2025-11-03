@@ -1,358 +1,234 @@
-# Dashboard de Envíos
+📦 Dashboard de Envíos — Vite + React + JavaScript + CSS
 
-Panel web minimalista construido con **Vite + React + JavaScript + CSS**. Muestra KPIs, filtros en tiempo real, tablas y gráficos (Recharts), además de **exportación a CSV** de los resultados filtrados.
+Un panel web interactivo para visualizar, filtrar y analizar envíos. Incluye KPIs, tabla dinámica, gráficos con Recharts y exportación a CSV.
+Construido con un stack simple y rápido: Vite + React + JavaScript + CSS puro.
 
-> Este README explica en detalle la **arquitectura**, **cómo correrlo**, **cómo funciona cada parte**, cómo **extenderlo** y cómo **deployarlo**.
+🚀 Características principales
 
----
+✅ Filtros en tiempo real
+✅ Búsqueda por ID / Origen / Destino
+✅ Filtro por estado, carrier y rango de fechas
+✅ KPIs automáticos
+✅ Gráficos responsivos (Barras y Líneas)
+✅ Tabla con datos filtrados
+✅ Exportación a CSV de los resultados filtrados
+✅ Mock data generada dinámicamente
+✅ Código limpio, modular y fácil de extender
 
-## 1) Objetivos del proyecto
+🛠️ Tecnologías usadas
 
-* Tener un **dashboard de envíos** listo para usar como demo o base de un proyecto real.
-* Proveer **filtros** de búsqueda (texto, estado, carrier y rango de fechas) que afecten a **KPIs**, **gráficos** y **tabla** de manera sincronizada.
-* Permitir **exportar a CSV** los resultados filtrados.
-* Mantener un stack simple (sin TypeScript, sin Tailwind) y **rendimiento** decente con React + Vite.
+Vite – build rápido y liviano
 
----
+React 18 – UI declarativa
 
-## 2) Tecnologías
+Recharts – librería de gráficos simple y poderosa
 
-* **Vite**: bundler/dev server extremadamente rápido.
-* **React 18**: librería para UI (hooks, renderización eficiente).
-* **Recharts**: librería de gráficos basada en D3, simple y declarativa.
-* **CSS**: hojas de estilo planas (`globals.css` y `dashboard.css`).
+CSS – estilos personalizados (sin Tailwind)
 
----
+JavaScript – sin TypeScript para simplicidad
 
-## 3) Requisitos previos
-
-* Node.js ≥ 18
-* npm ≥ 9 (o pnpm/yarn si preferís)
-
-Verificá versiones:
-
-```bash
-node -v
-npm -v
-```
-
----
-
-## 4) Instalación y ejecución local
-
-```bash
-# 1) Crear proyecto (si aún no existe)
-npm create vite@latest envios-dashboard -- --template react
+📂 Estructura del proyecto
+envios-dashboard/
+├── index.html
+├── package.json
+├── vite.config.js
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── data/
+    │   └── shipments.js
+    ├── utils/
+    │   ├── csv.js
+    │   └── format.js
+    ├── components/
+    │   ├── Topbar.jsx
+    │   ├── KPIs.jsx
+    │   ├── Filters.jsx
+    │   ├── ShipmentsTable.jsx
+    │   └── Charts.jsx
+    └── styles/
+        ├── globals.css
+        └── dashboard.css
+▶️ Instalación y ejecución
+1. Clonar el repo
+git clone https://github.com/tu-usuario/envios-dashboard.git
 cd envios-dashboard
-
-# 2) Instalar dependencias
-npm i recharts
-
-# 3) Copiar el código fuente dentro de /src (ver estructura de archivos abajo)
-
-# 4) Correr en desarrollo
+2. Instalar dependencias
+npm install
+3. Ejecutar en modo desarrollo
 npm run dev
-```
-
-Scripts útiles (en `package.json`):
-
-* `dev`: levanta el servidor de desarrollo con HMR.
-* `build`: genera la versión optimizada en `dist/`.
-* `preview`: sirve el build localmente para validar el deploy.
-
-```bash
+4. Build de producción
 npm run build
 npm run preview
-```
 
----
+🔧 Explicación de cada parte del código
+📌 App.jsx — El corazón del dashboard
 
-## 5) Estructura de archivos
+Controla:
 
-```
-envios-dashboard/
-├─ index.html
-├─ package.json
-├─ vite.config.js
-└─ src/
-   ├─ main.jsx                # Punto de entrada React
-   ├─ App.jsx                 # Layout principal y orquestación
-   ├─ data/
-   │  └─ shipments.js         # Datos mockeados (semilla)
-   ├─ utils/
-   │  ├─ csv.js               # toCSV() y downloadCSV()
-   │  └─ format.js            # fmtDate() y fmtMoney()
-   ├─ components/
-   │  ├─ Topbar.jsx           # Encabezado con botón Exportar
-   │  ├─ KPIs.jsx             # Tarjetas de métrica
-   │  ├─ Filters.jsx          # Controles de filtrado
-   │  ├─ ShipmentsTable.jsx   # Tabla de resultados
-   │  └─ Charts.jsx           # Gráficos (Bar + Line)
-   └─ styles/
-      ├─ globals.css          # Tema base y utilidades
-      └─ dashboard.css        # Ajustes específicos
-```
+Estados de filtros
 
----
+Lógica de filtrado (useMemo)
 
-## 6) Flujo de datos y estado
+Renderiza KPIs, tabla, filtros y gráficos
 
-* El componente **App** mantiene el estado de filtros: `query`, `status`, `carrier`, `fromDate`, `toDate`.
-* Los datos base provienen de `data/shipments.js` (exporta un array `shipments`).
-* Con `useMemo`, **App** calcula `filtered` aplicando todos los criterios. Ese array filtrado se pasa a:
+Maneja exportación a CSV
 
-  * `KPIs` (para contar totales, demorados, entregados y promedio de costo)
-  * `Charts` (para armar series agregadas por `status` y por día de creación)
-  * `ShipmentsTable` (para renderizar filas)
+Filtrado centralizado:
 
-```mermaid
-graph LR
-  SEED(Shipments seed) --> useMemo[useMemo(filters)] --> KPIs & Charts & Table
-  Filters --> useState --> useMemo
-```
-
-**Ventaja**: un único cálculo (`filtered`) alimenta todas las vistas, evitando duplicar lógica.
-
----
-
-## 7) Filtros: cómo funcionan
-
-En `App.jsx`:
-
-* **Texto (`query`)**: busca coincidencias en `id`, `origin`, `destination` (case-insensitive).
-* **Estado (`status`)**: compara igualdad exacta ("pending", "in_transit", "delivered", "delayed").
-* **Carrier (`carrier`)**: compara igualdad exacta ("Correo Argentino", "Andreani", "DHL", "UPS").
-* **Fechas (`fromDate`, `toDate`)**: se convierten a `Date` y se comparan con `createdAt` de cada envío.
-
-Fragmento clave:
-
-```js
 const filtered = useMemo(() => {
   return SEED.filter((s) => {
-    const q = query.trim().toLowerCase()
+    const q = query.toLowerCase()
     const passQ = !q || s.id.toLowerCase().includes(q) ||
-      s.origin.toLowerCase().includes(q) || s.destination.toLowerCase().includes(q)
+      s.origin.toLowerCase().includes(q) ||
+      s.destination.toLowerCase().includes(q)
 
     const passStatus = !status || s.status === status
     const passCarrier = !carrier || s.carrier === carrier
 
     const created = new Date(s.createdAt)
     const passFrom = !fromDate || created >= new Date(fromDate)
-    const passTo   = !toDate   || created <= new Date(toDate)
+    const passTo = !toDate || created <= new Date(toDate)
 
     return passQ && passStatus && passCarrier && passFrom && passTo
   })
 }, [query, status, carrier, fromDate, toDate])
-```
 
-El botón **“Limpiar filtros”** setea todos los estados a `''`.
+🔍 Filters.jsx — Panel de filtros
 
----
+Incluye:
 
-## 8) KPIs: qué muestran
+Input de búsqueda
 
-En `components/KPIs.jsx`:
+Select de estado
 
-* **Envíos**: `data.length`.
-* **Entregados**: cantidad con `status === 'delivered'`.
-* **Demorados**: cantidad con `status === 'delayed'`.
-* **Costo promedio**: promedio de `cost` redondeado y formateado con `fmtMoney`.
+Select de carrier
 
-```js
-const total = data.length
-const delivered = data.filter(d => d.status === 'delivered').length
-const delayed = data.filter(d => d.status === 'delayed').length
-const avgCost = data.length ? Math.round(data.reduce((a,b) => a + b.cost, 0) / data.length) : 0
-```
+Filtro “desde / hasta” por fecha
 
----
+Botón de “limpiar filtros”
 
-## 9) Gráficos (Recharts)
+Todo controlado por props → 100% reutilizable.
 
-En `components/Charts.jsx`:
+📊 KPIs.jsx — Métricas rápidas
 
-* **Barras por estado**: agrega `count` por `status` y los etiqueta en español.
-* **Línea por día** (creación): agrupa por `YYYY-MM-DD` según `createdAt`.
+Calcula en tiempo real:
 
-Recharts utilizado:
+Total de envíos
 
-* `ResponsiveContainer`: se adapta al ancho del contenedor.
-* `BarChart` + `Bar` con `CartesianGrid`, `XAxis`, `YAxis`, `Tooltip`.
-* `LineChart` + `Line` con los mismos ejes y tooltip.
+Entregados
 
-Si `data` cambia (por filtros), se regeneran las series con `useMemo`.
+Demorados
 
----
+Costo promedio
 
-## 10) Tabla de envíos
+Usa formateo con Intl.NumberFormat.
 
-En `components/ShipmentsTable.jsx`:
+📈 Charts.jsx — Gráficos Recharts
 
-* Renderiza columnas: `ID`, `Origen`, `Destino`, `Estado`, `Carrier`, `Creado`, `ETA`, `Costo`.
-* `labelStatus()` traduce los valores técnicos a etiquetas amigables.
-* Usa utilidades de formato: `fmtDate` y `fmtMoney`.
-* Muestra un estado vacío si no hay filas filtradas.
+Incluye dos gráficos:
 
-> Sugerencia de mejora: agregar **paginación** y **ordenamiento** por columna.
+Barras → Envíos por estado
 
----
+Línea → Envíos por día (fecha de creación)
 
-## 11) Utilidades
+Ambos se recalculan con useMemo para no re-renderizar de más.
 
-### 11.1 `utils/format.js`
+📄 ShipmentsTable.jsx — Tabla de resultados
 
-* `fmtDate(iso: string)`: convierte ISO a `DD/MM/YYYY` según `es-AR`.
-* `fmtMoney(n: number)`: formatea moneda en ARS sin decimales.
+Renderiza los envíos filtrados
 
-### 11.2 `utils/csv.js`
+Usa formateadores fmtDate() y fmtMoney()
 
-* `toCSV(rows: Array<Object>)`: serializa el array a CSV (escapando comillas, comas y saltos de línea).
-* `downloadCSV(csvString, filename)`: dispara la descarga creando un Blob y un link temporal.
+Muestra cartel si no hay resultados
 
-> Exporta exactamente **lo filtrado** en la UI.
+Pinta estado con “pill” de colores
 
----
+Fácil de extender si querés agregar columnas.
 
-## 12) Datos de ejemplo (`data/shipments.js`)
+🧪 utils/csv.js — Exportación a CSV
 
-* Genera 120 envíos aleatorios con:
+Convierte todo el array de resultados filtrados en un CSV válido y dispara descarga local.
 
-  * `id` (`SHP-0001`, ...)
-  * `origin`/`destination` (ciudades predefinidas)
-  * `status` (uno de `pending | in_transit | delivered | delayed`)
-  * `carrier` (uno de `Correo Argentino | Andreani | DHL | UPS`)
-  * `createdAt` (fecha entre agosto 2025 y hoy)
-  * `eta` (2 a 12 días después de `createdAt`)
-  * `cost` (entre 15k y 22k ARS aprox.)
+downloadCSV(csv, `envios_${Date.now()}.csv`)
 
-> En un proyecto real, reemplazá este archivo por un **fetch a tu API**.
+🗂️ data/shipments.js — Datos mockeados
 
----
+Genera 120 envíos con:
 
-## 13) Estilos (CSS)
+ID
 
-* `globals.css`: define **tema** (variables CSS), tipografía, layout base y componentes UI (botones, cards, pills, etc.).
-* `dashboard.css`: ajustes menores del layout raíz.
+Origen / Destino
 
-Diseño:
+Estado
 
-* Paleta **oscura** con contraste suficiente.
-* Layout **responsive**: grids que colapsan de 2→1 columna en móviles.
-* Componentes simples (sin dependencias de UI externas).
+Carrier
 
----
+createdAt
 
-## 14) Accesibilidad (a11y) y UX
+ETA
 
-* Labels conectados a inputs/selects.
-* Tamaños de toque adecuados (padding en botones y celdas).
-* Contraste pensado para tema oscuro.
-* Tooltips en gráficos proveídos por Recharts.
+Costo
 
-Posibles mejoras:
+Ideal para testing o demos.
 
-* Navegación por teclado y focus-styles más visibles.
-* Anunciar cantidad de resultados filtrados con `aria-live`.
+🎨 Estilos (CSS)
 
----
+globals.css → paleta, tipografía, botones, tabla, inputs
+dashboard.css → ajustes del layout general
 
-## 15) Rendimiento y buenas prácticas
+Incluye diseño responsivo para móviles.
 
-* `useMemo` evita recomputar filtros y agregaciones si no cambian dependencias.
-* Evitar crear objetos/funciones nuevas en cada render innecesariamente.
-* Para datasets grandes, considerar:
+✅ Cómo extender el dashboard
+Agregar columna nueva
 
-  * Paginación/virtualización de filas (ej.: `react-virtualized` / `react-window`).
-  * Mover filtros y agregaciones pesadas a **Web Workers** o al servidor.
+Editar dataset (shipments.js)
 
----
+Agregar <th> y <td> en ShipmentsTable.jsx
 
-## 16) Errores comunes (troubleshooting)
+Opcional: actualizar KPIs o Charts
 
-* **Pantalla negra + error `SEED.filters is not a function`**: usaste `.filters` en vez de `.filter` en `App.jsx`.
-* **`newDate is not defined`**: typo; debe ser `new Date(...)`.
-* **`createdAt` vs `createAt`**: el nombre de la propiedad debe ser **`createdAt`** (lo usa la tabla y charts).
-* Mensajes sobre `chrome-extension://...` en consola: provienen de **extensiones del navegador**; usar incógnito sin extensiones si molestan.
+Conectar con API real
+useEffect(() => {
+  fetch('/api/shipments')
+    .then(r => r.json())
+    .then(setRows)
+}, [])
 
----
+Agregar paginación
 
-## 17) Cómo integrar una API real
+react-window
 
-1. Reemplazá la importación del seed por un estado local:
+react-virtualized
 
-   ```jsx
-   const [rows, setRows] = useState([])
-   useEffect(() => {
-     fetch('/api/shipments')
-       .then(r => r.json())
-       .then(setRows)
-       .catch(console.error)
-   }, [])
-   ```
-2. Cambiá `SEED` por `rows` en el `useMemo` de filtrado.
-3. Asegurate de que tu API devuelva campos con **los mismos nombres** (`createdAt`, `status`, etc.).
+paginación manual usando slices
 
-> Si usás `json-server` para mockear: definí `db.json` con un array `shipments` y montalo en un puerto, luego hacé `fetch('http://localhost:3000/shipments')`.
+Modo oscuro/claro
 
----
+alternar variables CSS
 
-## 18) Extensiones sugeridas (roadmap)
+guardar preferencia en localStorage
+🐞 Troubleshooting
+✅ Pantalla en negro
 
-* **Paginación y ordenamiento** de tabla.
-* **Importación CSV** con validaciones y mapeo de columnas.
-* **Modo claro/oscuro** con toggle (guardar preferencia en `localStorage`).
-* **Roles/login** (solo visual, o integrados con backend).
-* **Atajos de teclado** (limpiar filtros, exportar, enfocar búsqueda).
-* **Tests** de unidad (Jest + React Testing Library).
-* **Error Boundaries** para manejo de errores de render.
+Casi siempre es un error de:
 
----
+Filtros (filter vs filters)
 
-## 19) Deploy
+Typos (createdAt vs createAt)
 
-### 19.1 Netlify
+Imports rotos
 
-```bash
-npm run build
-# Arrastrá la carpeta dist/ al dashboard de Netlify, o conectá el repo.
-# Build command: npm run build
-# Publish directory: dist
-```
+✅ Errores de chrome-extension://
 
-### 19.2 Vercel
+No vienen del proyecto → es el navegador.
+Probar en incógnito sin extensiones.
 
-* Importá el repo desde Vercel y aceptá los defaults (framework: Vite).
+✅ CSV vacío
 
-### 19.3 GitHub Pages
+Asegurate de tener resultados filtrados.
+Si no hay rows → genera encabezados solamente.
 
-```bash
-npm run build
-# Publicá la carpeta dist/ con GitHub Pages (branch gh-pages o /docs).
-```
+📝 Licencia
 
-> Tras el deploy, probá `npm run preview` localmente para validar que los assets se sirvan bien.
-
----
-
-## 20) FAQ
-
-**¿Puedo cambiar las ciudades/carriers/estados?**
-Sí, editá `data/shipments.js` (o tu API) y/o los `<option>` de `Filters.jsx`.
-
-**¿Cómo cambio el formato de moneda/fecha?**
-En `utils/format.js` modificá `Intl.NumberFormat` y `toLocaleDateString`.
-
-**¿Se puede usar TypeScript o Tailwind?**
-Sí. Este proyecto es minimalista, pero se puede portar a TS y reemplazar CSS por Tailwind.
-
-**¿Cómo agrego una columna nueva (p. ej., peso)?**
-
-1. Añadí el campo al dataset.
-2. Sumá la columna en `ShipmentsTable.jsx`.
-3. Si corresponde, incluílo en filtros/KPIs/Charts.
-
----
-
-## 21) Licencia
-
-MIT — libre para usar y modificar. Agradecimientos son bienvenidos 😊
+MIT — Podés usarlo, adaptarlo y mejorarlo libremente.
