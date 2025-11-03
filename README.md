@@ -26,32 +26,10 @@ Recharts – librería de gráficos simple y poderosa
 CSS – estilos personalizados (sin Tailwind)
 
 JavaScript – sin TypeScript para simplicidad
-
-📂 Estructura del proyecto
-envios-dashboard/
-├── index.html
-├── package.json
-├── vite.config.js
-└── src/
-    ├── main.jsx
-    ├── App.jsx
-    ├── data/
-    │   └── shipments.js
-    ├── utils/
-    │   ├── csv.js
-    │   └── format.js
-    ├── components/
-    │   ├── Topbar.jsx
-    │   ├── KPIs.jsx
-    │   ├── Filters.jsx
-    │   ├── ShipmentsTable.jsx
-    │   └── Charts.jsx
-    └── styles/
-        ├── globals.css
-        └── dashboard.css
+s
 ▶️ Instalación y ejecución
 1. Clonar el repo
-git clone https://github.com/tu-usuario/envios-dashboard.git
+git clone 
 cd envios-dashboard
 2. Instalar dependencias
 npm install
