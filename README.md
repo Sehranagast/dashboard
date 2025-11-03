@@ -186,6 +186,7 @@ Modo oscuro/claro
 alternar variables CSS
 
 guardar preferencia en localStorage
+
 🐞 Troubleshooting
 ✅ Pantalla en negro
 
